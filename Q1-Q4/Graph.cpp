@@ -1,79 +1,105 @@
 #include "Graph.hpp"
 #include <stack>
 #include <stdexcept>
+#include <cstdlib>
+#include <algorithm>
 
+/**
+ * Constructs a random graph with the specified number of vertices and edges.
+ */
+Graph::Graph(unsigned int vertexCount, unsigned int edgeCount, int randomSeed)
+    : Graph(vertexCount) {
+    if (edgeCount > (vertexCount * (vertexCount - 1)) / 2) {
+        throw std::invalid_argument("Too many edges for the given number of vertices.");
+    }
+    srand(randomSeed);
 
-Graph::Graph(unsigned int nVertices, unsigned int nEdges, int seed) : Graph(nVertices) { // Random graph
-    if (nEdges > (nVertices*nVertices - nVertices)/2)
-        throw std::invalid_argument("Too many edges");
-    srand(seed);
-
-    std::vector<Edge> edges;
-    edges.reserve((nVertices*nVertices - nVertices)/2);
-    for (unsigned int i = 0; i < nVertices-1; i++) {
-        for (unsigned int j = i+1; j < nVertices; j++) {
-            edges.push_back({i,j});
+    // Generate all possible edges
+    std::vector<Edge> potentialEdges;
+    potentialEdges.reserve((vertexCount * (vertexCount - 1)) / 2);
+    for (unsigned int i = 0; i < vertexCount - 1; i++) {
+        for (unsigned int j = i + 1; j < vertexCount; j++) {
+            potentialEdges.push_back({i, j});
         }
     }
 
-    while (edges.size() > nEdges) {
-        unsigned int randomIndex = rand() % edges.size();
-        std::swap(edges[randomIndex], edges.back()); // Swapping so we can use pop_back instead of erasing the mid
-        edges.pop_back();
+    // Randomly remove edges to meet the desired edge count
+    while (potentialEdges.size() > edgeCount) {
+        unsigned int randomIndex = rand() % potentialEdges.size();
+        std::swap(potentialEdges[randomIndex], potentialEdges.back());
+        potentialEdges.pop_back();
     }
 
-    for (const auto& edge : edges)
+    // Add the remaining edges to the graph
+    for (const auto& edge : potentialEdges) {
         addEdge(edge);
+    }
 }
 
-
-void Graph::addEdge(unsigned int u, unsigned int v) {
-    if (u == v) throw std::logic_error("Simple graphs don't have an edge from a vertex to itself.");
-    adjMatrix.at(u).at(v) = adjMatrix.at(v).at(u) = true;
+/**
+ * Adds an edge between two vertices.
+ */
+void Graph::addEdge(unsigned int startVertex, unsigned int endVertex) {
+    if (startVertex == endVertex) {
+        throw std::logic_error("Self-loops are not allowed in simple graphs.");
+    }
+    adjacencyMatrix.at(startVertex).at(endVertex) = true;
+    adjacencyMatrix.at(endVertex).at(startVertex) = true;
 }
 
+/**
+ * Finds an Eulerian circle in the graph, if one exists.
+ */
+std::vector<Edge> Graph::findEulerianCircle() const {
+    std::vector<unsigned int> vertexDegree(vertexCount, 0);
 
-std::vector<Edge> Graph::getEulerianCircle() const {
-    std::vector<unsigned int> degree(numVertices, 0);
-    for (unsigned int i = 0; i < numVertices; i++) {
-        for (unsigned int j = 0; j < numVertices; j++)
-            degree[i] += adjMatrix[i][j];
-
-        if (degree[i] % 2 == 1) return {}; // No Eulerian circle exists if any vertex has odd degree
+    // Calculate vertex degrees and check for odd degrees
+    for (unsigned int i = 0; i < vertexCount; i++) {
+        for (unsigned int j = 0; j < vertexCount; j++) {
+            vertexDegree[i] += adjacencyMatrix[i][j];
+        }
+        if (vertexDegree[i] % 2 == 1) {
+            return {}; // No Eulerian circle exists
+        }
     }
 
-    unsigned int startVertex = numVertices;
-    for (unsigned int i = 0; i < numVertices; i++) {
-        if (degree[i] > 0) {
+    // Identify starting vertex
+    unsigned int startVertex = vertexCount;
+    for (unsigned int i = 0; i < vertexCount; i++) {
+        if (vertexDegree[i] > 0) {
             startVertex = i;
             break;
         }
     }
-    if (startVertex == numVertices) return {}; // No edges in the graph
+    if (startVertex == vertexCount) {
+        return {}; // No edges in the graph
+    }
 
+    // Find the Eulerian circle
     std::vector<Edge> eulerianCircle;
-    std::stack<unsigned int> stack;
-    std::vector<std::vector<bool>> adjMatrixCopy = adjMatrix;
+    std::stack<unsigned int> traversalStack;
+    std::vector<std::vector<bool>> matrixCopy = adjacencyMatrix;
 
-    stack.push(startVertex);
-    while (!stack.empty()) {
-        unsigned int u = stack.top();
-        bool foundEdge = false;
+    traversalStack.push(startVertex);
+    while (!traversalStack.empty()) {
+        unsigned int currentVertex = traversalStack.top();
+        bool edgeFound = false;
 
-        for (unsigned int v = 0; v < numVertices; v++) { // Find an edge from u
-            if (adjMatrixCopy[u][v]) {
-                adjMatrixCopy[u][v] = adjMatrixCopy[v][u] = false;
-                stack.push(v);
-                foundEdge = true;
+        // Search for an edge from the current vertex
+        for (unsigned int nextVertex = 0; nextVertex < vertexCount; nextVertex++) {
+            if (matrixCopy[currentVertex][nextVertex]) {
+                matrixCopy[currentVertex][nextVertex] = matrixCopy[nextVertex][currentVertex] = false;
+                traversalStack.push(nextVertex);
+                edgeFound = true;
                 break;
             }
         }
 
-        if (!foundEdge) { // We finished all the edges from u, add it to the path
-            stack.pop();
-            if (!stack.empty()) {
-                unsigned int v = stack.top();
-                eulerianCircle.push_back({u, v});
+        if (!edgeFound) {
+            traversalStack.pop();
+            if (!traversalStack.empty()) {
+                unsigned int previousVertex = traversalStack.top();
+                eulerianCircle.push_back({currentVertex, previousVertex});
             }
         }
     }
