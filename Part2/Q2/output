@@ -1,1 +1,8 @@
-h
+tsofia@tsofia-VirtualBox:~/Desktop/EX_4/Q2$ make
+g++ -std=c++17 -Wall -Wextra -pthread -c main.cpp -o main.o
+g++ -std=c++17 -Wall -Wextra -pthread -o main main.o
+./main
+Incrementing shared counter 100,000 times using multiple threads:
+Waiting for threads to finish...
+Final value of the shared counter: 100000
+tsofia@tsofia-VirtualBox:~/Desktop/EX_4/Q2$ 
