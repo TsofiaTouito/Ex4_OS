@@ -1,58 +1,52 @@
-
 #include "Graph.hpp"
 #include <iostream>
 #include <getopt.h>
 
-using std::cout;
-using std::endl;
-
 int main(int argc, char* argv[]) {
-
-    unsigned int numVertices;
-    unsigned int numEdges;
-    int seed;
-    int option;
+    unsigned int vertexCount, edgeCount;
+    int randomSeed;
 
     if (argc != 7) {
-        fprintf(stderr, "Usage: %s [-n num of vertices] [-m num of edges] [-s seed]\n", argv[0]);
-        exit(1);
+        std::cerr << "Usage: " << argv[0] << " -n <vertices> -m <edges> -s <seed>\n";
+        return 1;
     }
 
+    int option;
     while ((option = getopt(argc, argv, "n:m:s:")) != -1) {
         switch (option) {
             case 'n':
-                numVertices = atoi(optarg);
+                vertexCount = std::stoi(optarg);
                 break;
             case 'm':
-                numEdges = atoi(optarg);
+                edgeCount = std::stoi(optarg);
                 break;
             case 's':
-                seed = atoi(optarg);
+                randomSeed = std::stoi(optarg);
                 break;
             default:
-                fprintf(stderr, "Usage: %s [-n num of vertices] [-m num of edges] [-s seed]\n", argv[0]);
-                exit(1);
+                std::cerr << "Usage: " << argv[0] << " -n <vertices> -m <edges> -s <seed>\n";
+                return 1;
         }
     }
 
-    Graph graph;
     try {
-        graph = Graph(numVertices, numEdges, seed);
-    } catch (const std::invalid_argument& e) {
-        cout << e.what() << endl;
-        return 0;
-    }
+        Graph graph(vertexCount, edgeCount, randomSeed);
+        auto eulerianCircle = graph.findEulerianCircle();
 
-    std::vector<Edge> circle = graph.getEulerianCircle();
-    if (circle.empty()) {
-        cout << "No Eulerian circle exists" << endl;
-        return 0;
+        if (eulerianCircle.empty()) {
+            std::cout << "No Eulerian circle exists.\n";
+        } else {
+            std::cout << "Eulerian circle found: ";
+            std::cout << eulerianCircle.front().startVertex;
+            for (const auto& edge : eulerianCircle) {
+                std::cout << " -> " << edge.endVertex;
+            }
+            std::cout << '\n';
+        }
+    } catch (const std::exception& e) {
+        std::cerr << "Error: " << e.what() << '\n';
+        return 1;
     }
-    else cout << "Eulerian path found" << endl;
-    cout << circle[0].u;
-    for (auto& edge : circle)
-        cout << "->" << edge.v;
-    cout << endl;
 
     return 0;
 }
