@@ -1,0 +1,13 @@
+tsofia@tsofia-VirtualBox:~/Desktop/EX_4/Q1$ make
+g++ -std=c++17 -Wall -Wextra -pthread -c main.cpp -o main.o
+g++ -std=c++17 -Wall -Wextra -pthread -o main main.o
+./main
+Setting data in singleton_instance1 to 5
+singleton_instance1: 5 singleton_instance2: 5
+Setting data in singleton_instance2 to 10
+singleton_instance1: 10 singleton_instance2: 10
+Thread 2 initial data: 10
+Thread 1 initial data: 10
+Thread 1 updating data to: 15
+Thread 1 updated data: 15
+Thread 2 data after sleep: 15
