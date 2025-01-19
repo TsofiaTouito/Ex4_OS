@@ -1,0 +1,67 @@
+tsofia@tsofia-VirtualBox:~/Desktop/EX_4/Q7$ valgrind --tool=helgrind ./race_test
+==12605== Helgrind, a thread error detector
+==12605== Copyright (C) 2007-2017, and GNU GPL'd, by OpenWorks LLP et al.
+==12605== Using Valgrind-3.18.1 and LibVEX; rerun with -h for copyright info
+==12605== Command: ./race_test
+==12605== 
+==12605== ---Thread-Announcement------------------------------------------
+==12605== 
+==12605== Thread #4 was created
+==12605==    at 0x49959F3: clone (clone.S:76)
+==12605==    by 0x49968EE: __clone_internal (clone-internal.c:83)
+==12605==    by 0x49046D8: create_thread (pthread_create.c:295)
+==12605==    by 0x49051FF: pthread_create@@GLIBC_2.34 (pthread_create.c:828)
+==12605==    by 0x4853767: ??? (in /usr/libexec/valgrind/vgpreload_helgrind-amd64-linux.so)
+==12605==    by 0x1092C3: main (q7.c:39)
+==12605== 
+==12605== ---Thread-Announcement------------------------------------------
+==12605== 
+==12605== Thread #3 was created
+==12605==    at 0x49959F3: clone (clone.S:76)
+==12605==    by 0x49968EE: __clone_internal (clone-internal.c:83)
+==12605==    by 0x49046D8: create_thread (pthread_create.c:295)
+==12605==    by 0x49051FF: pthread_create@@GLIBC_2.34 (pthread_create.c:828)
+==12605==    by 0x4853767: ??? (in /usr/libexec/valgrind/vgpreload_helgrind-amd64-linux.so)
+==12605==    by 0x1092C3: main (q7.c:39)
+==12605== 
+==12605== ----------------------------------------------------------------
+==12605== 
+==12605== Possible data race during read of size 8 at 0x10C018 by thread #4
+==12605== Locks held: none
+==12605==    at 0x10920B: square (q7.c:19)
+==12605==    by 0x485396A: ??? (in /usr/libexec/valgrind/vgpreload_helgrind-amd64-linux.so)
+==12605==    by 0x4904AC2: start_thread (pthread_create.c:442)
+==12605==    by 0x4995A03: clone (clone.S:100)
+==12605== 
+==12605== This conflicts with a previous write of size 8 by thread #3
+==12605== Locks held: none
+==12605==    at 0x109215: square (q7.c:19)
+==12605==    by 0x485396A: ??? (in /usr/libexec/valgrind/vgpreload_helgrind-amd64-linux.so)
+==12605==    by 0x4904AC2: start_thread (pthread_create.c:442)
+==12605==    by 0x4995A03: clone (clone.S:100)
+==12605==  Address 0x10c018 is 0 bytes inside data symbol "accum"
+==12605== 
+==12605== ----------------------------------------------------------------
+==12605== 
+==12605== Possible data race during write of size 8 at 0x10C018 by thread #4
+==12605== Locks held: none
+==12605==    at 0x109215: square (q7.c:19)
+==12605==    by 0x485396A: ??? (in /usr/libexec/valgrind/vgpreload_helgrind-amd64-linux.so)
+==12605==    by 0x4904AC2: start_thread (pthread_create.c:442)
+==12605==    by 0x4995A03: clone (clone.S:100)
+==12605== 
+==12605== This conflicts with a previous write of size 8 by thread #3
+==12605== Locks held: none
+==12605==    at 0x109215: square (q7.c:19)
+==12605==    by 0x485396A: ??? (in /usr/libexec/valgrind/vgpreload_helgrind-amd64-linux.so)
+==12605==    by 0x4904AC2: start_thread (pthread_create.c:442)
+==12605==    by 0x4995A03: clone (clone.S:100)
+==12605==  Address 0x10c018 is 0 bytes inside data symbol "accum"
+==12605== 
+2870
+==12605== 
+==12605== Use --history-level=approx or =none to gain increased speed, at
+==12605== the cost of reduced accuracy of conflicting-access information
+==12605== For lists of detected and suppressed errors, rerun with: -s
+==12605== ERROR SUMMARY: 36 errors from 2 contexts (suppressed: 342 from 18)
+tsofia@tsofia-VirtualBox:~/Desktop/EX_4/Q7$ 
